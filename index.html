@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Familial 2026 - Dashboard Ultime</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<style>
+:root {
+    --bg:#0f172a;--bg2:#1e293b;--bg3:#253349;--bg4:#334155;
+    --t1:#f1f5f9;--t2:#94a3b8;--t3:#64748b;
+    --blue:#3b82f6;--purple:#8b5cf6;--emerald:#10b981;--amber:#f59e0b;
+    --rose:#f43f5e;--cyan:#06b6d4;--orange:#f97316;--pink:#ec4899;
+    --lime:#84cc16;--indigo:#6366f1;--teal:#14b8a6;
+    --gap:16px;--r:12px;--sh:0 4px 6px -1px rgba(0,0,0,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:var(--bg);color:var(--t1);line-height:1.5;min-height:100vh}
+.wrap{max-width:1500px;margin:0 auto;padding:var(--gap)}
+header{background:linear-gradient(135deg,#1e3a5f 0%,#2d1b69 50%,#1a4731 100%);padding:28px 32px;border-radius:var(--r);margin-bottom:var(--gap);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;box-shadow:var(--sh)}
+header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+header .sub{font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px}
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,0.2);border-radius:8px;padding:4px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:rgba(255,255,255,0.6);transition:all .2s;border:none;background:none}
+.tab.active{background:rgba(255,255,255,0.15);color:#fff}
+.tab:hover{color:#fff}
+.filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:var(--gap)}
+.fg{display:flex;align-items:center;gap:6px}
+.fg label{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.fg select{padding:8px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:8px;background:var(--bg2);color:#fff;font-size:13px;cursor:pointer}
+.fg select option{background:var(--bg2);color:#fff}
+.section{display:none}.section.active{display:block}
+.stitle{font-size:18px;font-weight:700;margin:20px 0 14px;padding-left:12px;border-left:3px solid var(--blue);letter-spacing:-.3px}
+.grid{display:grid;gap:var(--gap)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g6{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--bg2);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh);transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.kpi{border-left:4px solid var(--blue)}
+.kpi.g{border-left-color:var(--emerald)}.kpi.p{border-left-color:var(--purple)}.kpi.a{border-left-color:var(--amber)}.kpi.r{border-left-color:var(--rose)}.kpi.c{border-left-color:var(--cyan)}
+.kpi-l{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.kpi-v{font-size:26px;font-weight:700;margin-bottom:2px}
+.kpi-s{font-size:11px;color:var(--t3)}
+.bar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:8px;overflow:hidden}
+.bar-f{height:100%;border-radius:2px;transition:width .6s}
+.chart-card{background:var(--bg2);border-radius:var(--r);padding:24px;box-shadow:var(--sh)}
+.chart-card h3{font-size:14px;font-weight:600;margin-bottom:16px}
+.chart-card canvas{max-height:320px}
+.chart-tall canvas{max-height:500px}
+.alert-box{border-radius:var(--r);padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px;font-size:13px}
+.alert-box.warn{background:rgba(245,158,11,0.1);border-left:4px solid var(--amber)}
+.alert-box.danger{background:rgba(244,63,94,0.1);border-left:4px solid var(--rose)}
+.alert-box.ok{background:rgba(16,185,129,0.1);border-left:4px solid var(--emerald)}
+.alert-box.info{background:rgba(59,130,246,0.1);border-left:4px solid var(--blue)}
+.alert-icon{font-size:20px;flex-shrink:0}
+.alert-title{font-weight:600;margin-bottom:2px}
+.sim-row{display:flex;flex-wrap:wrap;gap:var(--gap);margin-bottom:var(--gap)}
+.sim-card{background:var(--bg2);border-radius:var(--r);padding:20px 24px;flex:1;min-width:280px;box-shadow:var(--sh)}
+.sim-card h4{font-size:13px;font-weight:600;margin-bottom:12px;color:var(--t2)}
+.slider-group{margin-bottom:14px}
+.slider-group label{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:6px}
+.slider-group label span{color:var(--blue);font-weight:600}
+input[type=range]{width:100%;height:6px;border-radius:3px;-webkit-appearance:none;background:var(--bg4);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--blue);cursor:pointer;box-shadow:0 2px 6px rgba(59,130,246,0.4)}
+.sim-result{background:var(--bg);border-radius:8px;padding:16px;margin-top:12px}
+.sim-result .big{font-size:28px;font-weight:700}
+.sim-result .label{font-size:11px;color:var(--t3);text-transform:uppercase}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl thead th{text-align:left;padding:10px 12px;border-bottom:2px solid rgba(255,255,255,0.1);color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;user-select:none;white-space:nowrap}
+.tbl thead th:hover{color:var(--t1)}
+.tbl tbody td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.tbl tbody tr:hover{background:rgba(255,255,255,0.03)}
+.tbl .num{text-align:right;font-family:'SF Mono',Consolas,monospace}
+.tbl .pos{color:var(--emerald)}.tbl .neg{color:var(--rose)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase}
+.badge.up{background:rgba(244,63,94,0.15);color:var(--rose)}
+.badge.down{background:rgba(16,185,129,0.15);color:var(--emerald)}
+.badge.flat{background:rgba(148,163,184,0.15);color:var(--t2)}
+.compare-selectors{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:var(--gap);align-items:end}
+.compare-selectors .fg select{min-width:220px}
+.multi-check{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.chip{padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;border:1px solid rgba(255,255,255,0.15);color:var(--t2);transition:all .2s;white-space:nowrap}
+.chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.chip:hover{border-color:var(--blue);color:var(--t1)}
+footer{text-align:center;padding:20px;color:var(--t3);font-size:11px;border-top:1px solid rgba(255,255,255,0.05);margin-top:24px}
+@media(max-width:768px){.g2,.g3{grid-template-columns:1fr}.g6{grid-template-columns:repeat(2,1fr)}header{flex-direction:column;align-items:flex-start}.compare-selectors{flex-direction:column}.compare-selectors .fg select{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+    <div><h1>Budget Familial 2026</h1><div class="sub">Dashboard d'aide a la decision - Famille Clougz</div></div>
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('overview',this)">Vue d'ensemble</button>
+        <button class="tab" onclick="showTab('compare',this)">Comparatif</button>
+        <button class="tab" onclick="showTab('simulator',this)">Simulateur</button>
+        <button class="tab" onclick="showTab('alerts',this)">Alertes</button>
+        <button class="tab" onclick="showTab('detail',this)">Detail</button>
+    </div>
+</header>
+
+<div class="filters">
+    <div class="fg"><label>Personne</label><select id="fp" onchange="refresh()"><option value="all">Tous</option><option value="mathieu">Mathieu</option><option value="ac">Anne-Claire</option><option value="commun">Commun</option></select></div>
+    <div class="fg"><label>Categorie</label><select id="fc" onchange="refresh()"><option value="all">Toutes</option><option value="Consommations courantes">Conso courantes</option><option value="Animaux">Animaux</option><option value="Transports">Transports</option><option value="Logement">Logement</option><option value="Enfants">Enfants</option><option value="Sante">Sante</option><option value="Epargne">Epargne</option></select></div>
+    <div class="fg"><label>Periode</label><select id="fv" onchange="refresh()"><option value="m">Mensuel</option><option value="a">Annuel</option></select></div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="sec-overview" class="section active">
+    <div class="grid g6" id="kpis"></div>
+    <div class="stitle">Repartition des Depenses</div>
+    <div class="grid g2">
+        <div class="chart-card"><h3>Depenses par Categorie</h3><canvas id="c-cat"></canvas></div>
+        <div class="chart-card"><h3 id="h-pers">Mathieu / Anne-Claire / Commun</h3><canvas id="c-pers"></canvas></div>
+    </div>
+    <div class="stitle">Analyse Detaillee</div>
+    <div class="grid g3">
+        <div class="chart-card"><h3>Top 10 Postes</h3><canvas id="c-top"></canvas></div>
+        <div class="chart-card"><h3>Revenus vs Depenses</h3><canvas id="c-bal"></canvas></div>
+        <div class="chart-card"><h3>Poids par Categorie</h3><canvas id="c-polar"></canvas></div>
+    </div>
+    <div class="stitle">Comptes Bancaires</div>
+    <div class="grid g2">
+        <div class="chart-card"><h3>Virements par Compte</h3><canvas id="c-acc"></canvas></div>
+        <div class="chart-card"><h3>Decomposition Reste a Vivre</h3><canvas id="c-rest"></canvas></div>
+    </div>
+</section>
+
+<!-- COMPARE -->
+<section id="sec-compare" class="section">
+    <div class="stitle">Comparatif par Situation de Vie</div>
+    <p style="color:var(--t2);font-size:13px;margin-bottom:16px">Chaque onglet du fichier Excel represente une situation de vie differente. Selectionnez les situations a comparer :</p>
+
+    <div style="margin-bottom:12px">
+        <button class="chip active" onclick="selectAllChips()" style="background:var(--purple);border-color:var(--purple);color:#fff">Tout selectionner</button>
+        <button class="chip" onclick="selectRecentChips()" style="border-color:var(--amber);color:var(--amber)">5 derniers</button>
+        <button class="chip" onclick="deselectAllChips()">Tout deselectionner</button>
+    </div>
+    <div class="multi-check" id="tab-chips"></div>
+
+    <div class="grid g2" style="margin-top:16px">
+        <div class="chart-card chart-tall"><h3>Depenses Totales par Situation</h3><canvas id="c-yexp"></canvas></div>
+        <div class="chart-card chart-tall"><h3>Revenus vs Depenses vs Solde</h3><canvas id="c-ybal"></canvas></div>
+    </div>
+    <div class="grid g2">
+        <div class="chart-card chart-tall"><h3>Evolution par Categorie</h3><canvas id="c-ycat"></canvas></div>
+        <div class="chart-card chart-tall"><h3>Taux d'Effort par Situation</h3><canvas id="c-yrate"></canvas></div>
+    </div>
+
+    <div class="stitle" style="margin-top:24px">Comparaison Detaillee : 2 Situations</div>
+    <div class="compare-selectors">
+        <div class="fg"><label>Situation A</label><select id="cmpA" onchange="renderCompareTable()"></select></div>
+        <div class="fg"><label>Situation B</label><select id="cmpB" onchange="renderCompareTable()"></select></div>
+    </div>
+    <div class="card" style="overflow-x:auto"><table class="tbl" id="tbl-compare"></table></div>
+</section>
+
+<!-- SIMULATOR -->
+<section id="sec-simulator" class="section">
+    <div class="stitle">Simulateur de Scenarios</div>
+    <div class="sim-row">
+        <div class="sim-card">
+            <h4>Revenus</h4>
+            <div class="slider-group"><label>Salaire Mathieu <span id="sl-mat-v">2 890 EUR</span></label><input type="range" id="sl-mat" min="1500" max="5000" value="2890" step="10" oninput="updateSim()"></div>
+            <div class="slider-group"><label>Salaire Anne-Claire <span id="sl-ac-v">3 465 EUR</span></label><input type="range" id="sl-ac" min="1500" max="5000" value="3465" step="10" oninput="updateSim()"></div>
+        </div>
+        <div class="sim-card">
+            <h4>Depenses Variables</h4>
+            <div class="slider-group"><label>Courses <span id="sl-courses-v">700 EUR</span></label><input type="range" id="sl-courses" min="300" max="1200" value="700" step="10" oninput="updateSim()"></div>
+            <div class="slider-group"><label>Essence <span id="sl-ess-v">100 EUR</span></label><input type="range" id="sl-ess" min="0" max="300" value="100" step="10" oninput="updateSim()"></div>
+            <div class="slider-group"><label>Loisirs / Abos <span id="sl-lois-v">52 EUR</span></label><input type="range" id="sl-lois" min="0" max="200" value="52" step="1" oninput="updateSim()"></div>
+        </div>
+        <div class="sim-card">
+            <h4>Credits &amp; Logement</h4>
+            <div class="slider-group"><label>Pret immobilier <span id="sl-pret-v">1 581 EUR</span></label><input type="range" id="sl-pret" min="0" max="2500" value="1581" step="10" oninput="updateSim()"></div>
+            <div class="slider-group"><label>Pret RAV4 <span id="sl-rav-v">460 EUR</span></label><input type="range" id="sl-rav" min="0" max="800" value="460" step="10" oninput="updateSim()"></div>
+            <div class="slider-group"><label>Epargne mensuelle <span id="sl-ep-v">470 EUR</span></label><input type="range" id="sl-ep" min="0" max="1500" value="470" step="10" oninput="updateSim()"></div>
+        </div>
+    </div>
+    <div class="grid g2">
+        <div class="chart-card"><h3>Simulation: Repartition</h3><canvas id="c-sim"></canvas></div>
+        <div class="sim-card">
+            <h4>Resultats de la Simulation</h4>
+            <div class="sim-result"><div class="label">Revenus mensuels</div><div class="big" id="sim-rev" style="color:var(--emerald)">6 355 EUR</div></div>
+            <div class="sim-result" style="margin-top:8px"><div class="label">Depenses mensuelles</div><div class="big" id="sim-dep" style="color:var(--rose)">4 838 EUR</div></div>
+            <div class="sim-result" style="margin-top:8px"><div class="label">Capacite d'epargne reelle</div><div class="big" id="sim-ep">1 517 EUR</div></div>
+            <div class="sim-result" style="margin-top:8px"><div class="label">Taux d'effort</div><div class="big" id="sim-tx">76.1%</div></div>
+            <div class="sim-result" style="margin-top:8px"><div class="label">Epargne annuelle projetee</div><div class="big" id="sim-epa" style="color:var(--cyan)">18 204 EUR</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ALERTS -->
+<section id="sec-alerts" class="section">
+    <div class="stitle">Alertes &amp; Recommandations</div>
+    <div id="alerts-container"></div>
+</section>
+
+<!-- DETAIL TABLE -->
+<section id="sec-detail" class="section">
+    <div class="stitle">Detail Complet des Depenses</div>
+    <div class="card" style="overflow-x:auto"><table class="tbl" id="tbl-detail"></table></div>
+</section>
+
+<footer>Budget Familial 2026 - Famille Clougz - Dashboard genere automatiquement depuis Google Sheet</footer>
+</div>
+
+<script>
+const C=['#3b82f6','#8b5cf6','#10b981','#f59e0b','#f43f5e','#06b6d4','#f97316','#ec4899','#84cc16','#6366f1','#14b8a6','#a855f7','#ef4444','#22c55e','#eab308','#0ea5e9','#d946ef','#64748b','#fb923c','#2dd4bf','#818cf8','#fbbf24','#4ade80','#f472b6','#38bdf8','#a3e635'];
+const fmt=v=>(v||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' \u20ac';
+
+const EXP=[
+{p:'Telephone portable',cat:'Consommations courantes',m:15,ac:12,co:0,t:27},
+{p:'Forfait ADSL / Tel / TV',cat:'Consommations courantes',m:0,ac:0,co:39,t:39},
+{p:'Courses',cat:'Consommations courantes',m:0,ac:0,co:700,t:700},
+{p:'Frais bancaires',cat:'Consommations courantes',m:10,ac:10,co:10,t:30},
+{p:'Netflix',cat:'Consommations courantes',m:0,ac:0,co:17,t:17},
+{p:'Deezer Family',cat:'Consommations courantes',m:0,ac:0,co:15,t:15},
+{p:'Pret consommation',cat:'Consommations courantes',m:0,ac:0,co:20,t:20},
+{p:'Vaya - nourriture',cat:'Animaux',m:0,ac:0,co:50,t:50},
+{p:'Vaya - sante veto',cat:'Animaux',m:0,ac:0,co:20,t:20},
+{p:'Mythos - nourriture',cat:'Animaux',m:0,ac:0,co:20,t:20},
+{p:'Pret RAV4',cat:'Transports',m:0,ac:0,co:460,t:460},
+{p:'Essence / recharge',cat:'Transports',m:0,ac:0,co:100,t:100},
+{p:'Assurance Toyota',cat:'Transports',m:0,ac:0,co:72,t:72},
+{p:'Assurance Moto',cat:'Transports',m:44,ac:0,co:0,t:44},
+{p:'Remboursement pret',cat:'Logement',m:0,ac:0,co:1581,t:1581},
+{p:'Telephone fixe',cat:'Logement',m:0,ac:0,co:30,t:30},
+{p:'Eau',cat:'Logement',m:0,ac:0,co:77.05,t:77.05},
+{p:'Electricite',cat:'Logement',m:0,ac:0,co:194,t:194},
+{p:'Gaz',cat:'Logement',m:0,ac:0,co:200,t:200},
+{p:'Poubelles',cat:'Logement',m:0,ac:0,co:12,t:12},
+{p:'Assurance habitation',cat:'Logement',m:0,ac:0,co:50,t:50},
+{p:'Impots fonciers',cat:'Logement',m:0,ac:0,co:95,t:95},
+{p:'Portable enfants',cat:'Enfants',m:0,ac:0,co:5,t:5},
+{p:'Ecole privee',cat:'Enfants',m:0,ac:0,co:150,t:150},
+{p:'Garderie',cat:'Enfants',m:0,ac:0,co:100,t:100},
+{p:'Cantine',cat:'Enfants',m:0,ac:0,co:200,t:200},
+{p:'Centre mercredis',cat:'Enfants',m:0,ac:0,co:150,t:150},
+{p:'Epargne vacances',cat:'Epargne',m:150,ac:150,co:0,t:300},
+{p:'Livret A Nathan',cat:'Epargne',m:30,ac:30,co:0,t:60},
+{p:'Livret A Mael',cat:'Epargne',m:30,ac:30,co:0,t:60},
+{p:'LDD Anne-Claire',cat:'Epargne',m:0,ac:50,co:0,t:50},
+];
+
+// === DONNÉES PAR ONGLET (SITUATION DE VIE) ===
+const HIST={
+'2026 augment cloug':{conso:848,animaux:50,transports:676,logement:2239.05,enfants:605,sante:0,epargne:470,total:4888.05,revM:2890,revAC:3465,revT:6355},
+'2025 - chien':{conso:848,animaux:50,transports:729.7,logement:2229,enfants:605,sante:0,epargne:470,total:4931.7,revM:2890,revAC:3300,revT:6190},
+'2025 après augmentation':{conso:848,animaux:0,transports:729.7,logement:2229,enfants:570,sante:0,epargne:470,total:4846.7,revM:2890,revAC:3300,revT:6190},
+'2024 - Congés Mobilité':{conso:828,animaux:0,transports:729.7,logement:2234,enfants:570,sante:120,epargne:470,total:4951.7,revM:2890,revAC:2790,revT:5680},
+'2023 après achat Nort':{conso:832.9,animaux:0,transports:729.7,logement:2281,enfants:530,sante:120,epargne:470,total:4963.6,revM:3100,revAC:2790,revT:5890},
+'2023 après vente viroflay':{conso:824.9,animaux:0,transports:728,logement:1770,enfants:500,sante:0,epargne:170,total:3992.9,revM:2999,revAC:2790,revT:5789},
+'2022 double maison':{conso:741,animaux:0,transports:696,logement:2546,enfants:500,sante:0,epargne:0,total:4483,revM:3000,revAC:2700,revT:5700},
+'2022 mai-aout':{conso:947.45,animaux:0,transports:815,logement:2002,enfants:1055,sante:0,epargne:0,total:4819.45,revM:3000,revAC:2700,revT:5700},
+'2022 viroflay':{conso:1022.45,animaux:0,transports:816.77,logement:2052,enfants:1055,sante:0,epargne:0,total:4946.22,revM:3000,revAC:2650,revT:5650},
+'2021 + RAV4 + creche':{conso:1022.45,animaux:0,transports:824.77,logement:2052,enfants:1055,sante:0,epargne:0,total:4954.22,revM:3000,revAC:2650,revT:5650},
+'2020 avc nounou':{conso:889,animaux:0,transports:487,logement:1953,enfants:950,sante:0,epargne:0,total:4279,revM:2823,revAC:2470,revT:5293},
+'2019 Impots source':{conso:885,animaux:0,transports:527,logement:2053,enfants:400,sante:0,epargne:0,total:3865,revM:2823,revAC:2470,revT:5293},
+'2018 à refaire':{conso:884,animaux:0,transports:746,logement:2053,enfants:400,sante:0,epargne:0,total:4083,revM:2900,revAC:2400,revT:5300},
+'fev 2017':{conso:816,animaux:0,transports:285,logement:1642.5,enfants:500,sante:25,epargne:12.5,total:3281,revM:3040,revAC:2450,revT:5490},
+'nov 2016':{conso:821,animaux:0,transports:515,logement:1336,enfants:600,sante:0,epargne:30,total:3302,revM:3040,revAC:2450,revT:5490},
+'2015 ecole':{conso:19,animaux:0,transports:295,logement:1316,enfants:300,sante:0,epargne:0,total:1930,revM:1950,revAC:1900,revT:3850},
+'2015 nounou':{conso:19,animaux:0,transports:295,logement:1320,enfants:390,sante:0,epargne:0,total:2024,revM:1950,revAC:1900,revT:3850},
+};
+const TABS=Object.keys(HIST);
+
+const REP={m:{co:1355.21,idf:218.28,brs:371.54,sub:1945.03,tot:2224.03,rest:665.97,ratio:.4548},
+ac:{co:1624.84,idf:261.72,brs:445.46,sub:2332.02,tot:2667.02,rest:797.98,ratio:.5452}};
+
+let charts={};
+let selectedTabs=new Set(TABS); // tous sélectionnés par défaut
+
+function destroyAll(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={}}
+
+function getVal(id){return document.getElementById(id).value}
+function getMult(){return getVal('fv')==='a'?12:1}
+function getFiltered(){
+    let d=EXP;
+    const cat=getVal('fc');
+    if(cat!=='all')d=d.filter(r=>r.cat===cat);
+    return d;
+}
+function getPersonVal(r){
+    const p=getVal('fp');
+    if(p==='mathieu')return r.m + r.co * REP.m.ratio;  // perso + part commune (45,48%)
+    if(p==='ac')return r.ac + r.co * REP.ac.ratio;      // perso + part commune (54,52%)
+    if(p==='commun')return r.co;
+    return r.t;
+}
+
+// Short labels for chart display
+function shortLabel(tab){
+    return tab.length>22?tab.substring(0,20)+'...':tab;
+}
+// Get revenue for a tab respecting person filter
+function getRev(t){
+    const p=getVal('fp');
+    const h=HIST[t];
+    if(p==='mathieu')return h.revM;
+    if(p==='ac')return h.revAC;
+    if(p==='commun')return 0;
+    return h.revT;
+}
+
+function showTab(id,btn){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('sec-'+id).classList.add('active');
+    btn.classList.add('active');
+    if(id==='compare')renderCompare();
+    if(id==='alerts')renderAlerts();
+    if(id==='simulator'&&!charts.sim)updateSim();
+}
+
+function refresh(){destroyAll();renderOverview();if(document.getElementById('sec-compare').classList.contains('active'))renderCompare();if(document.getElementById('sec-detail').classList.contains('active'))renderDetail()}
+
+// === CHIP SELECTION FOR COMPARE TAB ===
+function initChips(){
+    const container=document.getElementById('tab-chips');
+    container.innerHTML='';
+    TABS.forEach((tab,i)=>{
+        const chip=document.createElement('span');
+        chip.className='chip'+(selectedTabs.has(tab)?' active':'');
+        chip.textContent=shortLabel(tab);
+        chip.dataset.tab=tab;
+        chip.onclick=()=>toggleChip(chip,tab);
+        container.appendChild(chip);
+    });
+}
+function toggleChip(el,tab){
+    if(selectedTabs.has(tab)){selectedTabs.delete(tab);el.classList.remove('active')}
+    else{selectedTabs.add(tab);el.classList.add('active')}
+    renderCompareCharts();
+}
+function selectAllChips(){selectedTabs=new Set(TABS);initChips();renderCompareCharts()}
+function selectRecentChips(){selectedTabs=new Set(TABS.slice(0,5));initChips();renderCompareCharts()}
+function deselectAllChips(){selectedTabs.clear();initChips();renderCompareCharts()}
+function getSelected(){return TABS.filter(t=>selectedTabs.has(t))}
+
+// === INIT COMPARE DROPDOWNS ===
+function initCompareDropdowns(){
+    const selA=document.getElementById('cmpA'),selB=document.getElementById('cmpB');
+    selA.innerHTML='';selB.innerHTML='';
+    TABS.forEach(t=>{
+        selA.innerHTML+=`<option value="${t}">${t}</option>`;
+        selB.innerHTML+=`<option value="${t}">${t}</option>`;
+    });
+    selB.selectedIndex=Math.min(4,TABS.length-1);
+}
+
+// === OVERVIEW ===
+function renderOverview(){
+    const ml=getMult(),data=getFiltered(),p=getVal('fp');
+    const totalDep=data.reduce((s,r)=>s+getPersonVal(r),0)*ml;
+    const rev=p==='mathieu'?2890*ml:p==='ac'?3465*ml:p==='commun'?0:6355*ml;
+    const epargne=(rev-totalDep);
+    const txEffort=rev>0?(totalDep/rev*100):0;
+    const txEp=rev>0?(epargne/rev*100):0;
+    const logement=EXP.filter(r=>r.cat==='Logement').reduce((s,r)=>s+getPersonVal(r),0)*ml;
+    const txLog=rev>0?(logement/rev*100):0;
+
+    document.getElementById('kpis').innerHTML=`
+    <div class="card kpi g"><div class="kpi-l">Revenus</div><div class="kpi-v" style="color:var(--emerald)">${fmt(rev)}</div><div class="kpi-s">${p==='all'?'Foyer':'Individuel'} / ${ml===12?'an':'mois'}</div></div>
+    <div class="card kpi r"><div class="kpi-l">Depenses</div><div class="kpi-v" style="color:var(--rose)">${fmt(totalDep)}</div><div class="kpi-s">Taux d'effort : ${txEffort.toFixed(1)}%</div><div class="bar"><div class="bar-f" style="width:${Math.min(txEffort,100)}%;background:var(--rose)"></div></div></div>
+    <div class="card kpi"><div class="kpi-l">Epargne dispo</div><div class="kpi-v" style="color:var(--blue)">${fmt(epargne)}</div><div class="kpi-s">Taux : ${txEp.toFixed(1)}%</div><div class="bar"><div class="bar-f" style="width:${Math.min(txEp,100)}%;background:var(--blue)"></div></div></div>
+    <div class="card kpi p"><div class="kpi-l">Reste a vivre</div><div class="kpi-v" style="color:var(--purple)">${fmt(rev-totalDep)}</div><div class="kpi-s">~${fmt((rev-totalDep)/ml/30)} / jour</div></div>
+    <div class="card kpi a"><div class="kpi-l">Effort logement</div><div class="kpi-v" style="color:${txLog>33?'var(--rose)':'var(--amber)'}">${txLog.toFixed(1)}%</div><div class="kpi-s">${txLog>33?'> 33% !':'Norme OK'}</div><div class="bar"><div class="bar-f" style="width:${Math.min(txLog,100)}%;background:${txLog>33?'var(--rose)':'var(--amber)'}"></div></div></div>
+    <div class="card kpi c"><div class="kpi-l">Ratio M / AC</div><div class="kpi-v" style="color:var(--cyan)">45.5 / 54.5</div><div class="kpi-s">Proportionnel revenus</div></div>`;
+
+    const cats={};data.forEach(r=>{const v=getPersonVal(r)*ml;cats[r.cat]=(cats[r.cat]||0)+v});
+    const catLabels=Object.keys(cats),catData=Object.values(cats);
+    charts.cat=new Chart(document.getElementById('c-cat'),{type:'doughnut',data:{labels:catLabels,datasets:[{data:catData,backgroundColor:C.slice(0,catLabels.length).map(c=>c+'DD'),borderColor:'#1e293b',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',usePointStyle:true,padding:10,font:{size:11}}},tooltip:{callbacks:{label:ctx=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);return `${ctx.label}: ${fmt(ctx.parsed)} (${(ctx.parsed/t*100).toFixed(1)}%)`}}}}}});
+
+    const allCats=[...new Set(data.map(r=>r.cat))];
+    // Adapt stacked bar + title to person filter
+    const persTitle=p==='mathieu'?'Mathieu : Perso + Part commune':p==='ac'?'Anne-Claire : Perso + Part commune':p==='commun'?'Depenses Communes':'Mathieu / Anne-Claire / Commun';
+    document.getElementById('h-pers').textContent=persTitle;
+    let persDatasets;
+    if(p==='mathieu'){
+        persDatasets=[
+            {label:'Perso Mathieu',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.m,0)*ml),backgroundColor:'#3b82f6CC',borderRadius:4},
+            {label:'Part commune (45,5%)',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.co*REP.m.ratio,0)*ml),backgroundColor:'#8b5cf6CC',borderRadius:4}
+        ];
+    }else if(p==='ac'){
+        persDatasets=[
+            {label:'Perso Anne-Claire',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.ac,0)*ml),backgroundColor:'#ec4899CC',borderRadius:4},
+            {label:'Part commune (54,5%)',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.co*REP.ac.ratio,0)*ml),backgroundColor:'#8b5cf6CC',borderRadius:4}
+        ];
+    }else if(p==='commun'){
+        persDatasets=[
+            {label:'Commun',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.co,0)*ml),backgroundColor:'#8b5cf6CC',borderRadius:4}
+        ];
+    }else{
+        persDatasets=[
+            {label:'Mathieu',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.m,0)*ml),backgroundColor:'#3b82f6CC',borderRadius:4},
+            {label:'Anne-Claire',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.ac,0)*ml),backgroundColor:'#ec4899CC',borderRadius:4},
+            {label:'Commun',data:allCats.map(c=>data.filter(r=>r.cat===c).reduce((s,r)=>s+r.co,0)*ml),backgroundColor:'#8b5cf6CC',borderRadius:4}
+        ];
+    }
+    charts.pers=new Chart(document.getElementById('c-pers'),{type:'bar',data:{labels:allCats,datasets:persDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#64748b',font:{size:10},maxRotation:45}},y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    const sorted=[...data].map(r=>({p:r.p,v:getPersonVal(r)*ml})).filter(r=>r.v>0).sort((a,b)=>b.v-a.v).slice(0,10);
+    charts.top=new Chart(document.getElementById('c-top'),{type:'bar',data:{labels:sorted.map(r=>r.p),datasets:[{data:sorted.map(r=>r.v),backgroundColor:C.map(c=>c+'CC'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.x)}}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}}}});
+
+    charts.bal=new Chart(document.getElementById('c-bal'),{type:'bar',data:{labels:['Revenus','Depenses','Epargne planifiee','Marge libre'],datasets:[{data:[rev,totalDep,470*ml,(rev-totalDep-470*ml)],backgroundColor:['#10b981CC','#f43f5eCC','#8b5cf6CC','#06b6d4CC'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    const total=Object.values(cats).reduce((a,b)=>a+b,0);
+    charts.polar=new Chart(document.getElementById('c-polar'),{type:'polarArea',data:{labels:catLabels.map(c=>`${c} (${(cats[c]/total*100).toFixed(1)}%)`),datasets:[{data:catData,backgroundColor:C.slice(0,catLabels.length).map(c=>c+'AA')}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#94a3b8',usePointStyle:true,padding:8,font:{size:10}}},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.r)}}},scales:{r:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{display:false}}}}});
+
+    charts.acc=new Chart(document.getElementById('c-acc'),{type:'bar',data:{labels:['CA Nort-sur-Erdre','Ile-de-France','Boursorama'],datasets:[
+        {label:'Mathieu',data:[REP.m.co*ml,REP.m.idf*ml,REP.m.brs*ml],backgroundColor:'#3b82f6CC',borderRadius:4},
+        {label:'Anne-Claire',data:[REP.ac.co*ml,REP.ac.idf*ml,REP.ac.brs*ml],backgroundColor:'#ec4899CC',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8'}},y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    charts.rest=new Chart(document.getElementById('c-rest'),{type:'bar',data:{labels:['Mathieu','Anne-Claire'],datasets:[
+        {label:'Depenses communes',data:[REP.m.sub*ml,REP.ac.sub*ml],backgroundColor:'#f43f5eAA',borderRadius:4},
+        {label:'Depenses perso',data:[(REP.m.tot-REP.m.sub)*ml,(REP.ac.tot-REP.ac.sub)*ml],backgroundColor:'#f59e0bAA',borderRadius:4},
+        {label:'Reste a vivre',data:[REP.m.rest*ml,REP.ac.rest*ml],backgroundColor:'#10b981AA',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8'}},y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    renderDetail();
+}
+
+// === COMPARATIF PAR ONGLET ===
+function renderCompare(){
+    initChips();
+    initCompareDropdowns();
+    renderCompareCharts();
+    renderCompareTable();
+}
+
+function renderCompareCharts(){
+    ['yexp','ybal','ycat','yrate'].forEach(k=>{if(charts[k]){try{charts[k].destroy()}catch(e){}}});
+    const sel=getSelected();
+    if(sel.length===0)return;
+    const labels=sel.map(t=>shortLabel(t));
+    const bgColors=sel.map((_,i)=>C[i%C.length]+'CC');
+
+    // 1. Depenses totales par situation
+    charts.yexp=new Chart(document.getElementById('c-yexp'),{type:'bar',data:{labels,datasets:[{label:'Depenses',data:sel.map(t=>HIST[t].total),backgroundColor:bgColors,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>[sel[ctx[0].dataIndex]],label:ctx=>fmt(ctx.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxRotation:60,autoSkip:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    // 2. Revenus vs Depenses vs Solde (respecte filtre personne)
+    charts.ybal=new Chart(document.getElementById('c-ybal'),{type:'bar',data:{labels,datasets:[
+        {label:'Revenus',data:sel.map(t=>getRev(t)),backgroundColor:'#10b981AA',borderRadius:4},
+        {label:'Depenses',data:sel.map(t=>HIST[t].total),backgroundColor:'#f43f5eAA',borderRadius:4},
+        {label:'Solde',data:sel.map(t=>getRev(t)-HIST[t].total),backgroundColor:'#3b82f6AA',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',usePointStyle:true}},tooltip:{callbacks:{title:ctx=>[sel[ctx[0].dataIndex]],label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxRotation:60,autoSkip:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    // 3. Evolution par categorie (line)
+    const catKeys=['conso','transports','logement','enfants','epargne','animaux','sante'];
+    const catNames=['Conso','Transports','Logement','Enfants','Epargne','Animaux','Sante'];
+    charts.ycat=new Chart(document.getElementById('c-ycat'),{type:'line',data:{labels,datasets:catKeys.map((k,i)=>({label:catNames[i],data:sel.map(t=>HIST[t][k]||0),borderColor:C[i],backgroundColor:C[i]+'20',borderWidth:2,tension:.3,pointRadius:sel.length>15?2:4,pointHoverRadius:7}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#94a3b8',usePointStyle:true}},tooltip:{callbacks:{title:ctx=>[sel[ctx[0].dataIndex]],label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxRotation:60,autoSkip:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>fmt(v)}}}}});
+
+    // 4. Taux d'effort
+    charts.yrate=new Chart(document.getElementById('c-yrate'),{type:'line',data:{labels,datasets:[
+        {label:'Taux effort global',data:sel.map(t=>{const r=getRev(t);return r>0?(HIST[t].total/r*100):0}),borderColor:'#f43f5e',backgroundColor:'#f43f5e20',fill:true,borderWidth:2,tension:.3,pointRadius:sel.length>15?2:4},
+        {label:'Taux effort logement',data:sel.map(t=>{const r=getRev(t);return r>0?(HIST[t].logement/r*100):0}),borderColor:'#f59e0b',backgroundColor:'#f59e0b20',fill:true,borderWidth:2,tension:.3,pointRadius:sel.length>15?2:4},
+        {label:'Seuil 33%',data:sel.map(()=>33),borderColor:'rgba(255,255,255,0.3)',borderWidth:1,borderDash:[5,5],pointRadius:0,fill:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#94a3b8',usePointStyle:true}},tooltip:{callbacks:{title:ctx=>[sel[ctx[0].dataIndex]],label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxRotation:60,autoSkip:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>v+'%'},min:0,max:100}}}});
+}
+
+// === TABLE COMPARAISON 2 SITUATIONS ===
+function renderCompareTable(){
+    const a=getVal('cmpA'),b=getVal('cmpB');
+    const ha=HIST[a],hb=HIST[b];
+    if(!ha||!hb)return;
+    const p=getVal('fp');
+    const revA=getRev(a),revB=getRev(b);
+    const rows=[
+        ['Depenses totales',ha.total,hb.total],
+        [p==='mathieu'?'Revenus Mathieu':p==='ac'?'Revenus Anne-Claire':'Revenus totaux',revA,revB],
+        ['Solde mensuel',revA-ha.total,revB-hb.total],
+        ['Consommations',ha.conso,hb.conso],
+        ['Animaux',ha.animaux||0,hb.animaux||0],
+        ['Transports',ha.transports,hb.transports],
+        ['Logement',ha.logement,hb.logement],
+        ['Enfants',ha.enfants,hb.enfants],
+        ['Sante',ha.sante||0,hb.sante||0],
+        ['Epargne',ha.epargne,hb.epargne],
+        ['Salaire Mathieu',ha.revM,hb.revM],
+        ['Salaire Anne-Claire',ha.revAC,hb.revAC],
+    ];
+    let html=`<thead><tr><th>Indicateur</th><th>${a}</th><th>${b}</th><th>Variation</th><th>%</th><th>Tendance</th></tr></thead><tbody>`;
+    rows.forEach(([label,va,vb])=>{
+        const diff=vb-va;const pct=va?((diff/va)*100):0;
+        // Hausse = bon pour revenus/salaires/solde/epargne, mauvais pour dépenses
+        const isGood=label.includes('Revenu')||label.includes('Solde')||label.includes('Salaire')||label.includes('Epargne');
+        const isUp=diff>10,isDown=diff<-10;
+        const badge=isUp?'Hausse':isDown?'Baisse':'Stable';
+        // Badge color: green if good change, red if bad change, grey if stable
+        let badgeCls='flat';
+        if(isUp) badgeCls=isGood?'down':'up';       // 'down' class = green, 'up' class = red
+        if(isDown) badgeCls=isGood?'up':'down';
+        // Number color: same logic
+        const numCls=Math.abs(diff)<10?'':(isUp?(isGood?'pos':'neg'):(isGood?'neg':'pos'));
+        html+=`<tr><td>${label}</td><td class="num">${fmt(va)}</td><td class="num">${fmt(vb)}</td><td class="num ${numCls}">${diff>=0?'+':''}${fmt(diff)}</td><td class="num ${numCls}">${pct>=0?'+':''}${pct.toFixed(1)}%</td><td><span class="badge ${badgeCls}">${badge}</span></td></tr>`;
+    });
+    html+='</tbody>';
+    document.getElementById('tbl-compare').innerHTML=html;
+}
+
+// === SIMULATOR ===
+function updateSim(){
+    const revM=+document.getElementById('sl-mat').value;
+    const revAC=+document.getElementById('sl-ac').value;
+    const courses=+document.getElementById('sl-courses').value;
+    const ess=+document.getElementById('sl-ess').value;
+    const lois=+document.getElementById('sl-lois').value;
+    const pret=+document.getElementById('sl-pret').value;
+    const rav=+document.getElementById('sl-rav').value;
+    const ep=+document.getElementById('sl-ep').value;
+
+    document.getElementById('sl-mat-v').textContent=fmt(revM);
+    document.getElementById('sl-ac-v').textContent=fmt(revAC);
+    document.getElementById('sl-courses-v').textContent=fmt(courses);
+    document.getElementById('sl-ess-v').textContent=fmt(ess);
+    document.getElementById('sl-lois-v').textContent=fmt(lois);
+    document.getElementById('sl-pret-v').textContent=fmt(pret);
+    document.getElementById('sl-rav-v').textContent=fmt(rav);
+    document.getElementById('sl-ep-v').textContent=fmt(ep);
+
+    const rev=revM+revAC;
+    const fixe=27+39+30+77.05+194+200+12+50+95+72+44+5+150+100+200+150+50+20+20+20;
+    const dep=fixe+courses+ess+lois+pret+rav+ep;
+    const solde=rev-dep;
+    const tx=(dep/rev*100);
+
+    document.getElementById('sim-rev').textContent=fmt(rev);document.getElementById('sim-rev').style.color=rev>0?'var(--emerald)':'var(--rose)';
+    document.getElementById('sim-dep').textContent=fmt(dep);
+    document.getElementById('sim-ep').textContent=fmt(solde);document.getElementById('sim-ep').style.color=solde>0?'var(--emerald)':'var(--rose)';
+    document.getElementById('sim-tx').textContent=tx.toFixed(1)+'%';document.getElementById('sim-tx').style.color=tx>80?'var(--rose)':tx>70?'var(--amber)':'var(--emerald)';
+    document.getElementById('sim-epa').textContent=fmt(solde*12);
+
+    if(charts.sim)charts.sim.destroy();
+    charts.sim=new Chart(document.getElementById('c-sim'),{type:'doughnut',data:{labels:['Logement','Courses','Transports','Enfants','Epargne planifiee','Fixe divers','Marge libre'],datasets:[{data:[pret+77.05+194+200+12+50+95+30,courses,ess+72+44+rav,5+150+100+200+150,ep,27+39+lois+50+20+20+20,Math.max(0,solde)],backgroundColor:C.slice(0,7).map(c=>c+'DD'),borderColor:'#1e293b',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',usePointStyle:true,padding:10,font:{size:11}}},tooltip:{callbacks:{label:ctx=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);return `${ctx.label}: ${fmt(ctx.parsed)} (${(ctx.parsed/t*100).toFixed(1)}%)`}}}}}});
+}
+
+// === ALERTS ===
+function renderAlerts(){
+    const h=HIST['2026 augment cloug'],rev=h.revT;
+    const txLog=(h.logement/rev*100);
+    const txGlobal=(h.total/rev*100);
+    const solde=rev-h.total;
+    let html='';
+
+    if(txLog>33)html+=`<div class="alert-box danger"><span class="alert-icon">&#9888;</span><div><div class="alert-title">Taux d'effort logement eleve : ${txLog.toFixed(1)}%</div>Le seuil recommande est de 33%. Votre logement represente ${fmt(h.logement)}/mois.</div></div>`;
+    else html+=`<div class="alert-box ok"><span class="alert-icon">&#10004;</span><div><div class="alert-title">Taux d'effort logement correct : ${txLog.toFixed(1)}%</div>Vous etes dans la norme des 33%.</div></div>`;
+
+    if(txGlobal>75)html+=`<div class="alert-box warn"><span class="alert-icon">&#9888;</span><div><div class="alert-title">Taux d'effort global eleve : ${txGlobal.toFixed(1)}%</div>Plus de 3/4 de vos revenus sont absorbes.</div></div>`;
+    else html+=`<div class="alert-box ok"><span class="alert-icon">&#10004;</span><div><div class="alert-title">Taux d'effort global correct : ${txGlobal.toFixed(1)}%</div>Bonne maitrise du budget.</div></div>`;
+
+    const epPlanifiee=470;const epDispo=solde;
+    if(epDispo>epPlanifiee)html+=`<div class="alert-box ok"><span class="alert-icon">&#10004;</span><div><div class="alert-title">Capacite d'epargne supplementaire : ${fmt(epDispo-epPlanifiee)}/mois</div>Au-dela de l'epargne planifiee (${fmt(epPlanifiee)}), vous disposez de ${fmt(epDispo-epPlanifiee)} supplementaires soit ${fmt((epDispo-epPlanifiee)*12)}/an.</div></div>`;
+
+    html+=`<div class="alert-box info"><span class="alert-icon">&#9432;</span><div><div class="alert-title">Augmentation Anne-Claire : +165 EUR/mois vs 2025</div>Passage de 3 300 a 3 465 EUR, soit +1 980 EUR/an de capacite supplementaire.</div></div>`;
+
+    const gaz=200,elec=194;
+    if(gaz+elec>350)html+=`<div class="alert-box warn"><span class="alert-icon">&#128161;</span><div><div class="alert-title">Energie : ${fmt(gaz+elec)}/mois (${fmt((gaz+elec)*12)}/an)</div>Pistes : comparateur fournisseurs, isolation, thermostat intelligent. Economie potentielle : 10-20%.</div></div>`;
+
+    html+=`<div class="alert-box info"><span class="alert-icon">&#128200;</span><div><div class="alert-title">Pret RAV4 : ${fmt(460)}/mois</div>A la fin du pret, cette somme liberera ${fmt(460*12)}/an a rediriger vers l'epargne.</div></div>`;
+    html+=`<div class="alert-box ok"><span class="alert-icon">&#127919;</span><div><div class="alert-title">Epargne enfants : ${fmt(120)}/mois</div>Nathan et Mael recoivent chacun ${fmt(60)}/mois. Sur 10 ans a 3%, ~8 400 EUR par enfant.</div></div>`;
+
+    // Evolution historique insight
+    const oldestKey=TABS[TABS.length-1],oldest=HIST[oldestKey],newest=HIST['2026 augment cloug'];
+    if(oldest&&newest){const evol=((newest.total-oldest.total)/oldest.total*100).toFixed(0);
+    html+=`<div class="alert-box info"><span class="alert-icon">&#128202;</span><div><div class="alert-title">Evolution depuis ${oldestKey} : +${evol}% de depenses</div>De ${fmt(oldest.total)} a ${fmt(newest.total)}/mois. Les revenus sont passes de ${fmt(oldest.revT)} a ${fmt(newest.revT)} (+${((newest.revT-oldest.revT)/oldest.revT*100).toFixed(0)}%).</div></div>`;}
+
+    document.getElementById('alerts-container').innerHTML=html;
+}
+
+// === DETAIL TABLE ===
+function renderDetail(){
+    const data=getFiltered(),ml=getMult();
+    let sorted=[...data].map(r=>({...r,val:getPersonVal(r)*ml})).filter(r=>r.val>0);
+    sorted.sort((a,b)=>b.val-a.val);
+    const total=sorted.reduce((s,r)=>s+r.val,0);
+    let html='<thead><tr><th>Poste</th><th>Categorie</th><th>Mathieu</th><th>Anne-Claire</th><th>Commun</th><th>Total</th><th>% Budget</th></tr></thead><tbody>';
+    sorted.forEach(r=>{
+        const pct=(r.val/total*100).toFixed(1);
+        html+=`<tr><td>${r.p}</td><td>${r.cat}</td><td class="num">${r.m?fmt(r.m*ml):'-'}</td><td class="num">${r.ac?fmt(r.ac*ml):'-'}</td><td class="num">${r.co?fmt(r.co*ml):'-'}</td><td class="num" style="font-weight:600">${fmt(r.val)}</td><td class="num">${pct}%</td></tr>`;
+    });
+    html+=`<tr style="font-weight:700;background:rgba(16,185,129,0.1)"><td colspan="5" style="text-align:right">TOTAL</td><td class="num">${fmt(total)}</td><td class="num">100%</td></tr></tbody>`;
+    document.getElementById('tbl-detail').innerHTML=html;
+}
+
+// Init
+renderOverview();
+</script>
+</body>
+</html>
